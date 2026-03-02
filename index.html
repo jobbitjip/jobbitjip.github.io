@@ -5,35 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jip Sterling's International Sadness</title>
     <style>
+        /* The foundation: pitch black background */
         body, html {
             margin: 0;
             padding: 0;
-            height: 100%;
-            background-color: black;
-            overflow: hidden;
+            background-color: #000; 
+            min-height: 120vh; /* This creates the extra 'scroll' room you wanted */
+        }
+
+        .image-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;    /* Black space at the top */
+            padding-bottom: 50px; /* Black space at the bottom */
         }
 
         .bg-image {
             width: 100%;
-            height: 100%;
-            background-image: url('logo.jpg'); /* CHANGE THIS */
+            height: auto;
+            max-width: 100%;
+            background-image: url('logo.jpg'); /* UPDATE THIS */
             background-repeat: no-repeat;
             
             /* Laptop / MacBook Settings */
-            background-size: cover;
-            background-position: center 12%; 
+            aspect-ratio: 16 / 9; /* Keeps the proportions like a film */
+            background-size: contain; /* Ensures the whole image fits without cutting the top */
+            background-position: center top;
         }
 
         /* Phone / Mobile Settings */
         @media (max-width: 768px) {
+            body, html {
+                min-height: 110vh; /* Slightly less scroll on mobile */
+            }
+            .image-container {
+                padding-top: 100px; /* More padding to push it down on the phone */
+            }
             .bg-image {
-                background-size: 200%; /* The Zoom-in */
-                background-position: center 20%; /* The vertical adjustment */
+                /* Reduced the zoom significantly so it doesn't cut off half the image */
+                background-size: 140%; 
+                background-position: center center;
+                aspect-ratio: 9 / 16; /* Flips the ratio for a vertical screen */
             }
         }
     </style>
 </head>
 <body>
-    <div class="bg-image"></div>
+
+    <div class="image-container">
+        <div class="bg-image"></div>
+    </div>
+
 </body>
 </html>
