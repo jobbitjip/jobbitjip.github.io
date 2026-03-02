@@ -35,20 +35,27 @@
         }
 
         /* Phone / Mobile Settings */
-        @media (max-width: 500px) {
-            body, html {
-                min-height: 110vh; /* Slightly less scroll on mobile */
-            }
-            .image-container {
-                padding-top: 10px; /* More padding to push it down on the phone */
-            }
-            .bg-image {
-                /* Reduced the zoom significantly so it doesn't cut off half the image */
-                background-size: 140%; 
-                background-position: center center;
-                aspect-ratio: 9 / 16; /* Flips the ratio for a vertical screen */
-            }
-        }
+        @media (max-width: 768px) {
+    body, html {
+        min-height: 100%; /* Keeps it from over-scrolling on small screens */
+        overflow-y: scroll; 
+    }
+    
+    .image-container {
+        padding-top: 20px; /* Shorter gap at the top for phones */
+        display: block;    /* Changes how it sits on the screen */
+    }
+
+    .bg-image {
+        /* This is the magic number: 100% means "fit the width of my phone exactly" */
+        background-size: 100% auto; 
+        background-position: center top;
+        
+        /* This ensures the image shape stays true and doesn't stretch */
+        aspect-ratio: auto; 
+        height: 60vh; /* Adjust this if you want the image taller or shorter on the phone */
+    }
+}
     </style>
 </head>
 <body>
