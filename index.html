@@ -118,6 +118,31 @@
     <div class="enter-button-container">
     <a href="#" class="enter-button">ENTER THE SADNESS</a>
 </div>
+<audio id="sadness-audio" loop>
+  <source src="vortex.mp3" type="audio/mpeg">
+</audio>
+<script>
+  const button = document.querySelector('.enter-button');
+  const audio = document.getElementById('sadness-audio');
+
+  button.addEventListener('click', function(e) {
+    // If you want the button to play music instead of leaving the page:
+    e.preventDefault(); 
+    audio.play();
+    
+    // Optional: Fade the music in so it's not a jump-scare
+    audio.volume = 0;
+    let vol = 0;
+    const interval = setInterval(() => {
+      if (vol < 1) {
+        vol += 0.05;
+        audio.volume = vol.toFixed(2);
+      } else {
+        clearInterval(interval);
+      }
+    }, 100);
+  });
+</script>
 
 </body>
 </html>
