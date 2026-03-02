@@ -84,6 +84,23 @@
     border-color: #fff;
     letter-spacing: 0.5em;
 }
+        /* This creates the 'ghostly' fade-in effect */
+@keyframes fadeIn {
+    from { opacity: 0; filter: blur(5px); }
+    to { opacity: 1; filter: blur(0px); }
+}
+
+/* This applies it to the button and the image */
+.bg-image, .enter-button {
+    animation: fadeIn 2.5s ease-out forwards;
+}
+
+/* We want the button to wait a second so the image has its moment first */
+.enter-button {
+    animation-delay: 1.2s;
+    opacity: 0; /* Starts invisible */
+}
+
     </style>
 </head>
 <body>
