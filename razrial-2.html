@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Razrial — Puck-Lot FM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,300..700,0..1&family=Lora:ital,wght@0,400..600;1,400..500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1A1714;
+    --charcoal-2:#231F1A;
+    --amber:#C97B2E;
+    --ember:#E8A33D;
+    --teal:#2E6E64;
+    --teal-soft:#5FA396;
+    --rust:#8B4A3A;
+    --parchment:#EDE2CC;
+    --parchment-dim:#C9BFA8;
+    --tint:#5FA396;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--charcoal);
+    color:var(--parchment);
+    font-family:'Lora', serif;
+    font-size:17px;
+    line-height:1.7;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  h1,h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:0.78rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ember);
+  }
+
+  a{color:var(--ember);}
+
+  :focus-visible{
+    outline:2px solid var(--ember);
+    outline-offset:3px;
+  }
+
+  .home-link{
+    position:fixed;
+    top:18px;
+    left:22px;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:rgba(237,226,204,0.4);
+    text-decoration:none;
+    z-index:20;
+    transition:color 0.4s ease;
+  }
+  .home-link:hover{color:var(--ember);}
+
+  /* ---------- BIOLUMINESCENT FLORA — fixed, creeping from edges ---------- */
+  .flora{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    overflow:hidden;
+  }
+  .flora svg{
+    position:absolute;
+    filter:drop-shadow(0 0 14px rgba(95,163,150,0.55)) drop-shadow(0 0 30px rgba(95,163,150,0.25));
+  }
+  .flora .vine-tl{ top:-40px; left:-60px; width:320px; opacity:0.85; animation:breathe 7s ease-in-out infinite; }
+  .flora .vine-br{ bottom:-60px; right:-50px; width:380px; opacity:0.8; animation:breathe 9s ease-in-out infinite reverse; }
+  .flora .vine-bl{ bottom:-30px; left:-40px; width:240px; opacity:0.65; animation:breathe 8s ease-in-out infinite; }
+  .flora .spore{ animation:flicker 3.4s ease-in-out infinite; }
+
+  @keyframes breathe{
+    0%,100%{ opacity:0.55; }
+    50%{ opacity:0.95; }
+  }
+  @keyframes flicker{
+    0%,100%{ opacity:0.3; }
+    45%{ opacity:0.9; }
+    55%{ opacity:0.9; }
+    60%{ opacity:0.15; }
+  }
+
+  /* ---------- SIGNAL BANNER ---------- */
+  .signal-banner{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    padding:3.5rem 1.5rem 0;
+  }
+  .static-overlay{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:repeating-linear-gradient(
+      0deg,
+      rgba(237,226,204,0.025) 0px,
+      rgba(237,226,204,0.025) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    opacity:0;
+    animation:staticFade 2.6s ease-out forwards;
+  }
+  @keyframes staticFade{
+    0%{opacity:0.9;}
+    15%{opacity:0.55;}
+    100%{opacity:0.05;}
+  }
+
+  /* ---------- TUNER ---------- */
+  .tuner{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:5rem 1.5rem 4rem;
+  }
+
+  .tuner-dial-wrap{
+    position:relative;
+    width:220px;
+    height:220px;
+    margin-bottom:1rem;
+  }
+
+  .tdial{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    border:1px solid rgba(201,191,168,0.35);
+    position:relative;
+    background:radial-gradient(circle at 50% 40%, var(--charcoal-2), var(--charcoal));
+    cursor:grab;
+    touch-action:none;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.55), 0 0 30px rgba(95,163,150,0.08);
+  }
+  .tdial:active{ cursor:grabbing; }
+  .tdial::before{
+    content:'';
+    position:absolute;
+    inset:20px;
+    border-radius:50%;
+    border:1px solid rgba(232,163,61,0.22);
+  }
+  .tdial-needle{
+    position:absolute;
+    top:50%; left:50%;
+    width:2px;
+    height:88px;
+    background:var(--ember);
+    transform-origin:bottom center;
+    transform:translate(-50%,-100%) rotate(0deg);
+    border-radius:2px;
+    box-shadow:0 0 8px var(--ember);
+    transition:transform 0.5s cubic-bezier(.2,.9,.25,1);
+    pointer-events:none;
+  }
+  .tdial-needle.dragging{ transition:none; }
+  .tdial-center{
+    position:absolute;
+    top:50%; left:50%;
+    width:10px; height:10px;
+    margin:-5px 0 0 -5px;
+    border-radius:50%;
+    background:var(--ember);
+    box-shadow:0 0 10px var(--ember);
+    pointer-events:none;
+  }
+
+  .freq-readout{
+    font-family:'Space Mono', monospace;
+    font-size:0.95rem;
+    letter-spacing:0.06em;
+    color:var(--parchment-dim);
+    margin-bottom:2.2rem;
+    min-height:1.4em;
+  }
+
+  .stations{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:0.6rem;
+    margin-bottom:3rem;
+    max-width:600px;
+  }
+  .station-btn{
+    background:transparent;
+    border:1px solid rgba(237,226,204,0.18);
+    color:var(--parchment-dim);
+    font-family:'Space Mono', monospace;
+    font-size:0.68rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:0.55rem 0.9rem;
+    border-radius:2px;
+    cursor:pointer;
+    transition:border-color 0.3s ease, color 0.3s ease;
+  }
+  .station-btn:hover{
+    border-color:rgba(232,163,61,0.5);
+    color:var(--parchment);
+  }
+  .station-btn.active{
+    border-color:var(--ember);
+    color:var(--ember);
+  }
+
+  .tuner-content{
+    width:100%;
+    max-width:640px;
+    min-height:220px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    position:relative;
+  }
+
+  .tuner-glitch{
+    position:absolute;
+    inset:0;
+    background:repeating-linear-gradient(0deg, rgba(237,226,204,0.06) 0px, transparent 2px, transparent 4px);
+    opacity:0;
+    pointer-events:none;
+  }
+  .tuner-glitch.on{
+    animation:glitchFlash 0.35s steps(2) 2;
+  }
+  @keyframes glitchFlash{
+    0%{opacity:0.8;}
+    100%{opacity:0;}
+  }
+
+  .name-cluster{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:baseline;
+    gap:0.9rem 1.4rem;
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity 0.5s ease, transform 0.5s ease;
+  }
+  .name-cluster.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+  .name-cluster .nm{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    color:var(--tint);
+    text-shadow:0 0 18px var(--tint);
+    line-height:1.3;
+    white-space:nowrap;
+  }
+  .name-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0.25rem;
+  }
+  .role-tag{
+    font-family:'Space Mono', monospace;
+    font-style:normal;
+    font-size:0.62rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:rgba(237,226,204,0.45);
+  }
+  .name-cluster .unresolved{
+    font-family:'Space Mono', monospace;
+    font-style:normal;
+    font-size:0.85rem;
+    letter-spacing:0.1em;
+    color:rgba(237,226,204,0.3);
+    animation:flicker 3.4s ease-in-out infinite;
+  }
+  .unstable-tag{
+    font-family:'Space Mono', monospace;
+    font-size:0.8rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--tint);
+    text-shadow:0 0 14px var(--tint);
+    animation:flicker 2.2s ease-in-out infinite;
+  }
+  .single-presence{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:3.2rem;
+    letter-spacing:0.02em;
+    line-height:1.2;
+    animation:okBreathe 6s ease-in-out infinite;
+  }
+  @keyframes okBreathe{
+    0%,100%{ opacity:0.55; transform:scale(0.98); }
+    50%{ opacity:1; transform:scale(1.03); }
+  }
+
+  /* ---------- SIGNOFF ---------- */
+  .signoff{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    padding:5rem 1.5rem 5rem;
+    border-top:1px solid rgba(237,226,204,0.08);
+  }
+  .signoff .deck{
+    max-width:440px;
+    margin:1rem auto 2rem;
+    color:var(--parchment-dim);
+  }
+  .signoff .station-id{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:1.3rem;
+    margin-bottom:0.4rem;
+  }
+  .cta-link{
+    display:inline-block;
+    margin-top:1.2rem;
+    padding:0.8rem 1.7rem;
+    border:1px solid var(--ember);
+    border-radius:2px;
+    font-family:'Space Mono', monospace;
+    font-size:0.8rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ember);
+    text-decoration:none;
+    transition:background 0.25s ease, color 0.25s ease;
+  }
+  .cta-link:hover{
+    background:var(--ember);
+    color:var(--charcoal);
+  }
+  .fine-print{
+    font-family:'Space Mono', monospace;
+    font-size:0.7rem;
+    color:rgba(201,191,168,0.4);
+    margin-top:3rem;
+    letter-spacing:0.04em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .static-overlay, .hero-dial, .hero-needle, .hero h1, .hero .voice-line,
+    .hero .eyebrow.top, .scroll-cue, .name-cluster, .flora svg, .tdial-needle,
+    .single-presence, .unstable-tag, .name-cluster .unresolved{
+      animation:none !important;
+      transition:none !important;
+      opacity:1 !important;
+      transform:none !important;
+    }
+  }
+
+  @media (max-width: 600px){
+    .tuner-dial-wrap{ width:170px; height:170px; }
+    .tdial-needle{ height:68px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="home-link">&larr; jsis.blue</a>
+
+<div class="flora" aria-hidden="true">
+  <svg class="vine-tl" viewBox="0 0 200 200" fill="none">
+    <path d="M0 20 C40 10, 60 50, 90 40 C120 30, 110 70, 150 60" stroke="#5FA396" stroke-width="2" opacity="0.7"/>
+    <circle class="spore" cx="40" cy="22" r="3" fill="#9FE6D6"/>
+    <circle class="spore" cx="88" cy="42" r="2.5" fill="#9FE6D6"/>
+    <circle class="spore" cx="148" cy="58" r="3.5" fill="#9FE6D6"/>
+  </svg>
+  <svg class="vine-br" viewBox="0 0 240 240" fill="none">
+    <path d="M240 220 C200 230, 180 190, 150 200 C120 210, 130 170, 90 180 C60 188, 50 210, 20 200" stroke="#5FA396" stroke-width="2" opacity="0.7"/>
+    <circle class="spore" cx="155" cy="198" r="3" fill="#9FE6D6"/>
+    <circle class="spore" cx="92" cy="182" r="2.5" fill="#9FE6D6"/>
+    <circle class="spore" cx="22" cy="201" r="3.5" fill="#9FE6D6"/>
+  </svg>
+  <svg class="vine-bl" viewBox="0 0 180 140" fill="none">
+    <path d="M0 100 C30 80, 50 110, 80 95 C110 80, 100 50, 140 45" stroke="#5FA396" stroke-width="2" opacity="0.6"/>
+    <circle class="spore" cx="78" cy="93" r="2.5" fill="#9FE6D6"/>
+    <circle class="spore" cx="138" cy="46" r="3" fill="#9FE6D6"/>
+  </svg>
+</div>
+
+<header class="signal-banner">
+  <div class="static-overlay"></div>
+  <p class="eyebrow">SIGNAL ACQUIRED</p>
+</header>
+
+<section class="tuner" id="tuner">
+  <div class="tuner-dial-wrap">
+    <div class="tdial" id="tdial" tabindex="0" role="slider" aria-label="Tune frequency" aria-valuemin="0" aria-valuemax="6">
+      <div class="tdial-needle" id="tneedle"></div>
+      <div class="tdial-center"></div>
+    </div>
+  </div>
+  <p class="freq-readout" id="freqReadout">87.5 FM</p>
+
+  <div class="stations" id="stations"></div>
+
+  <div class="tuner-content">
+    <div class="tuner-glitch" id="glitch"></div>
+    <div class="name-cluster show" id="nameCluster"></div>
+  </div>
+</section>
+
+<footer class="signoff">
+  <p class="station-id">Stay close. The lights are on.</p>
+  <a class="cta-link" href="index.html">&larr; Back to jsis.blue</a>
+  <p class="fine-print">jsis.blue</p>
+</footer>
+
+<script>
+  const stations = [
+    {
+      freq: "87.5",
+      label: "MAIA'S CREW",
+      angle: -120,
+      tint: "#E8A33D",
+      names: [
+        {name:"Maia", role:"Anchor"},
+        {name:"Vesper", role:"Protector"},
+        {name:"Echo", role:"Hologram"},
+        {name:"Jules", role:"Bard"},
+        {name:"Maria", role:"Vanguard"}
+      ],
+      unresolved: 0
+    },
+    {
+      freq: "91.2",
+      label: "SARNIETH SISTERS",
+      angle: -70,
+      tint: "#6F9FE8",
+      names: [
+        {name:"Vaelin", role:"Navigator"},
+        {name:"Kaelthas", role:"Archivist"},
+        {name:"Myra", role:"Commander"},
+        {name:"Lysandra", role:"Analyst"},
+        {name:"Thalessa", role:"Sentinel"},
+        {name:"Iridia", role:"Prism-Tech"},
+        {name:"Eliana", role:"The Lens"}
+      ],
+      unresolved: 0
+    },
+    {
+      freq: "96.8",
+      label: "K'NERETH",
+      angle: -18,
+      tint: "#7FD9C4",
+      names: [
+        {name:"Sa'voren Sa'vienne", role:"Sovereign"}
+      ],
+      unresolved: 3
+    },
+    {
+      freq: "103.4",
+      label: "AELHARI",
+      angle: 18,
+      tint: "#A88BD6",
+      names: [],
+      unresolved: 4
+    },
+    {
+      freq: "106.9",
+      label: "O'K",
+      angle: 55,
+      tint: "#9C6B3E",
+      names: [],
+      single: ["O'K"],
+      unresolved: 0
+    },
+    {
+      freq: "108.0",
+      label: "MANTIS",
+      angle: 92,
+      tint: "#8FCB5A",
+      names: [],
+      unresolved: 5
+    },
+    {
+      freq: "—.—",
+      label: "ETHRYLL",
+      angle: 130,
+      tint: "#B6452F",
+      names: [],
+      unstable: ["ETHRYLL", "[ NO DESIGNATION ]"],
+      unresolved: 0
+    }
+  ];
+
+  const tdial = document.getElementById('tdial');
+  const tneedle = document.getElementById('tneedle');
+  const freqReadout = document.getElementById('freqReadout');
+  const nameCluster = document.getElementById('nameCluster');
+  const glitch = document.getElementById('glitch');
+  const stationsWrap = document.getElementById('stations');
+
+  let current = 0;
+  let dragging = false;
+
+  // build station buttons
+  stations.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'station-btn';
+    btn.type = 'button';
+    btn.textContent = s.freq + ' — ' + s.label;
+    btn.addEventListener('click', () => selectStation(i));
+    stationsWrap.appendChild(btn);
+  });
+
+  function renderContent(s){
+    nameCluster.classList.remove('show');
+    setTimeout(()=>{
+      nameCluster.innerHTML = '';
+      const sizes = [1.5, 1.15, 1.3, 1.05, 1.4, 1.1, 1.25];
+
+      if(s.unstable){
+        s.unstable.forEach((tag, idx) => {
+          const span = document.createElement('span');
+          span.className = 'unstable-tag';
+          span.textContent = tag;
+          span.style.animationDelay = (idx * 0.4) + 's';
+          nameCluster.appendChild(span);
+        });
+        nameCluster.classList.add('show');
+        return;
+      }
+
+      if(s.single){
+        const span = document.createElement('span');
+        span.className = 'single-presence';
+        span.textContent = s.single[0];
+        span.style.color = s.tint;
+        span.style.textShadow = '0 0 24px ' + s.tint + ', 0 0 48px ' + s.tint;
+        nameCluster.appendChild(span);
+        nameCluster.classList.add('show');
+        return;
+      }
+
+      s.names.forEach((entry, idx) => {
+        const item = document.createElement('div');
+        item.className = 'name-item';
+
+        const nm = document.createElement('span');
+        nm.className = 'nm';
+        nm.textContent = entry.name;
+        nm.style.fontSize = (sizes[idx % sizes.length]) + 'rem';
+        nm.style.color = s.tint;
+        nm.style.textShadow = '0 0 18px ' + s.tint;
+        item.appendChild(nm);
+
+        const role = document.createElement('span');
+        role.className = 'role-tag';
+        role.textContent = entry.role;
+        item.appendChild(role);
+
+        nameCluster.appendChild(item);
+      });
+      for(let i=0;i<s.unresolved;i++){
+        const span = document.createElement('span');
+        span.className = 'unresolved';
+        span.textContent = '· · ·';
+        nameCluster.appendChild(span);
+      }
+      if(s.names.length === 0 && s.unresolved === 0){
+        const span = document.createElement('span');
+        span.className = 'unresolved';
+        span.textContent = 'SIGNAL TOO WEAK TO RESOLVE';
+        nameCluster.appendChild(span);
+      }
+      nameCluster.classList.add('show');
+    }, 180);
+  }
+
+  function selectStation(i){
+    current = i;
+    const s = stations[i];
+    tneedle.style.transform = 'translate(-50%,-100%) rotate(' + s.angle + 'deg)';
+    freqReadout.textContent = s.freq + ' FM';
+    document.documentElement.style.setProperty('--tint', s.tint);
+    [...stationsWrap.children].forEach((b, idx) => b.classList.toggle('active', idx === i));
+    glitch.classList.remove('on');
+    requestAnimationFrame(()=> glitch.classList.add('on'));
+    renderContent(s);
+  }
+
+  // dragging the dial
+  function angleFromEvent(e){
+    const rect = tdial.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - cx;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - cy;
+    let deg = Math.atan2(x, -y) * (180/Math.PI);
+    deg = Math.max(-130, Math.min(130, deg));
+    return deg;
+  }
+
+  function nearestStation(deg){
+    let best = 0, bestDist = Infinity;
+    stations.forEach((s, i) => {
+      const d = Math.abs(s.angle - deg);
+      if(d < bestDist){ bestDist = d; best = i; }
+    });
+    return best;
+  }
+
+  tdial.addEventListener('pointerdown', (e)=>{
+    dragging = true;
+    tneedle.classList.add('dragging');
+    tdial.setPointerCapture(e.pointerId);
+  });
+  tdial.addEventListener('pointermove', (e)=>{
+    if(!dragging) return;
+    const deg = angleFromEvent(e);
+    tneedle.style.transform = 'translate(-50%,-100%) rotate(' + deg + 'deg)';
+  });
+  tdial.addEventListener('pointerup', (e)=>{
+    if(!dragging) return;
+    dragging = false;
+    tneedle.classList.remove('dragging');
+    const deg = angleFromEvent(e);
+    const idx = nearestStation(deg);
+    selectStation(idx);
+  });
+
+  tdial.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowRight') selectStation(Math.min(current+1, stations.length-1));
+    if(e.key === 'ArrowLeft') selectStation(Math.max(current-1, 0));
+  });
+
+  // init
+  selectStation(0);
+</script>
+
+</body>
+</html>
